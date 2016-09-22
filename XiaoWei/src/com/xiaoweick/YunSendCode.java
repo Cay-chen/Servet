@@ -94,6 +94,7 @@ public class YunSendCode extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		String mail = request.getParameter("singUpMail");
+		String nikeName = request.getParameter("nikeName");
 		response.setContentType("text/html; charset=utf-8");
 		if (mail != null) {
 			int YCode = (int) (Math.random() * (999999 - 100000 + 1)) + 100000;// 产生100000-999999的随机数整数验证码
@@ -116,21 +117,31 @@ public class YunSendCode extends HttpServlet {
 						sendCode = "10002";
 
 					} else {
-						sendMsg = "其他错误";// 其他错误呀
-						sendCode = "10003";
+							sendMsg = "其他错误";// 其他错误呀
+							sendCode = "10003";	
 					}
 
 				} else {
-					statement = connection.prepareStatement(deleteSql);
-					statement.executeUpdate();
-					String insertCodeSQL = "insert into users_code (mail,code,time) values('"
-							+ mail + "'," + YCode + ",now() )";
-					statement = connection.prepareStatement(insertCodeSQL);
-					int asc = statement.executeUpdate();
-					YunSendMail sendMail = new YunSendMail(mail, YCode);// 注册发送邮件客服端
-					sendMail.send();// 发送邮件
-					sendMsg = "验证信息已发送";// 验证信息已发送
-					sendCode = "10001";
+					String selectName = "select nikename from users WHERE nikename ='"
+							+ nikeName + "'";
+					statement = connection.prepareStatement(selectName);
+					mresult = statement.executeQuery();
+					if (mresult.next()) {
+						System.out.println("昵称已被使用");
+						sendCode = "10004";
+						sendMsg = "昵称已被使用";// 账号已注册成功
+					} else {
+						statement = connection.prepareStatement(deleteSql);
+						statement.executeUpdate();
+						String insertCodeSQL = "insert into users_code (mail,code,time) values('"
+								+ mail + "'," + YCode + ",now() )";
+						statement = connection.prepareStatement(insertCodeSQL);
+						int asc = statement.executeUpdate();
+						YunSendMail sendMail = new YunSendMail(mail, YCode);// 注册发送邮件客服端
+						sendMail.send();// 发送邮件
+						sendMsg = "验证信息已发送";// 验证信息已发送
+						sendCode = "10001";
+					}
 				}
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
