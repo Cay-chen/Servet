@@ -106,72 +106,79 @@ public class YunSendCode extends HttpServlet {
 			System.out.println("mail:" + mail + " ---SQL:" + selectNikeName);
 			String deleteSql = "delete from users_code where mail='" + mail
 					+ "'"; // 删除已存在的信息
-			connection = YunDBHelper.getConnection();
-			try {
-				statement = connection.prepareStatement(selectNikeName);
-				mresult = statement.executeQuery();
-				if (mresult.next()) {
-					String Omail = mresult.getString("mail");
-					if (Omail != null) {
-						sendMsg = "账号已经被注册";// 账号已经被注册
-						sendCode = "10002";
+			connection = new YunDBHelper().getConnection();
+			if (connection == null) {
+				sendMsg = "服务器异常";// 验证信息已发送
+				sendCode = "10006";
 
-					} else {
-							sendMsg = "其他错误";// 其他错误呀
-							sendCode = "10003";	
-					}
-
-				} else {
-					String selectName = "select nikename from users WHERE nikename ='"
-							+ nikeName + "'";
-					statement = connection.prepareStatement(selectName);
+			} else {
+				try {
+					statement = connection.prepareStatement(selectNikeName);
 					mresult = statement.executeQuery();
 					if (mresult.next()) {
-						System.out.println("昵称已被使用");
-						sendCode = "10004";
-						sendMsg = "昵称已被使用";// 账号已注册成功
+						String Omail = mresult.getString("mail");
+						if (Omail != null) {
+							sendMsg = "账号已经被注册";// 账号已经被注册
+							sendCode = "10002";
+
+						} else {
+							sendMsg = "其他错误";// 其他错误呀
+							sendCode = "10003";
+						}
+
 					} else {
-						statement = connection.prepareStatement(deleteSql);
-						statement.executeUpdate();
-						String insertCodeSQL = "insert into users_code (mail,code,time) values('"
-								+ mail + "'," + YCode + ",now() )";
-						statement = connection.prepareStatement(insertCodeSQL);
-						int asc = statement.executeUpdate();
-						YunSendMail sendMail = new YunSendMail(mail, YCode);// 注册发送邮件客服端
-						sendMail.send();// 发送邮件
-						sendMsg = "验证信息已发送";// 验证信息已发送
-						sendCode = "10001";
+						String selectName = "select nikename from users WHERE nikename ='"
+								+ nikeName + "'";
+						statement = connection.prepareStatement(selectName);
+						mresult = statement.executeQuery();
+						if (mresult.next()) {
+							System.out.println("昵称已被使用");
+							sendCode = "10004";
+							sendMsg = "昵称已被使用";// 账号已注册成功
+						} else {
+							statement = connection.prepareStatement(deleteSql);
+							statement.executeUpdate();
+							String insertCodeSQL = "insert into users_code (mail,code,time) values('"
+									+ mail + "'," + YCode + ",now() )";
+							statement = connection
+									.prepareStatement(insertCodeSQL);
+							int asc = statement.executeUpdate();
+							YunSendMail sendMail = new YunSendMail(mail, YCode);// 注册发送邮件客服端
+							sendMail.send();// 发送邮件
+							sendMsg = "验证信息已发送";// 验证信息已发送
+							sendCode = "10001";
+						}
 					}
-				}
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} finally {
-				if (mresult != null) {
-					try {
-						mresult.close();
-						mresult = null;
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} finally {
+					if (mresult != null) {
+						try {
+							mresult.close();
+							mresult = null;
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
-				}
 
-				if (statement != null) {
-					try {
-						statement.close();
-						statement = null;
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					if (statement != null) {
+						try {
+							statement.close();
+							statement = null;
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
-				}
 
+				}
 			}
 		} else {
 
 			sendMsg = "账号为空";// 账号为空
-			sendCode = "10004";
+			sendCode = "10005";
 		}
 		SimpleDateFormat sm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		PrintWriter out = response.getWriter();

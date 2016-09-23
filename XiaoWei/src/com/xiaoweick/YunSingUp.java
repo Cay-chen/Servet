@@ -1,5 +1,6 @@
 package com.xiaoweick;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -92,6 +93,8 @@ public class YunSingUp extends HttpServlet {
 
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
+		String originalPath = "E:\\Photo\\original\\";
+		String thumbnailPath = "E:\\Photo\\thumbnail\\";
 		String nikeName = request.getParameter("nikeName");
 		String mail = request.getParameter("mail");
 		String password = request.getParameter("password");
@@ -108,14 +111,20 @@ public class YunSingUp extends HttpServlet {
 					+ mail + "'";// 查询验证码信息
 			String selectYanZ = "select mail from users WHERE mail ='" + mail
 					+ "'"; // 查看该账号是否被注册
-			connection = YunDBHelper.getConnection();
-			try {
-				statement = connection.prepareStatement(selectYanZ);
-				mresult = statement.executeQuery();
-				if (mresult.next()) {
-					resCoad = "30004";
-					resMsg = "账号已注册成功";// 账号已注册成功
-				} else {
+
+			connection = new YunDBHelper().getConnection();
+			if (connection == null) {
+				resCoad = "30006";
+				resMsg = "服务器异常";
+
+			} else {
+				try {
+					statement = connection.prepareStatement(selectYanZ);
+					mresult = statement.executeQuery();
+					if (mresult.next()) {
+						resCoad = "30004";
+						resMsg = "账号已注册成功";// 账号已注册成功
+					} else {
 						statement = connection.prepareStatement(deleteMySQL);
 						statement.executeUpdate();
 						statement = connection.prepareStatement(selectSQLCode);
@@ -137,6 +146,16 @@ public class YunSingUp extends HttpServlet {
 									statement = connection
 											.prepareStatement(insertSql);
 									statement.executeUpdate();
+									String yun = originalPath + nikeName;
+									String lue = thumbnailPath + nikeName;
+									if (!new File(yun).exists()) {
+										File file = new File(yun);
+										file.mkdirs();
+									}
+									if (!new File(lue).exists()) {
+										File file = new File(lue);
+										file.mkdirs();
+									}
 
 									resCoad = "30001";// 注册成功
 									resMsg = "注册成功";
@@ -152,36 +171,37 @@ public class YunSingUp extends HttpServlet {
 							resMsg = "验证码过期";
 
 						}
-					
-				}
 
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
-				if (mresult != null) {
-					try {
-						mresult.close();
-						mresult = null;
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
-				}
 
-				if (statement != null) {
-					try {
-						statement.close();
-						statement = null;
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					if (mresult != null) {
+						try {
+							mresult.close();
+							mresult = null;
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+
+					if (statement != null) {
+						try {
+							statement.close();
+							statement = null;
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 			}
 		} else {
 			resCoad = "30005";// 信息为空
-			resMsg = "信息为空";
+			resMsg = "注册账号为空";
 
 		}
 		SimpleDateFormat sm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

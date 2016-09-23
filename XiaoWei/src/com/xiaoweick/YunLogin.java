@@ -20,7 +20,7 @@ import net.sf.json.JSONObject;
 import com.xiaoweick.util.YunDBHelper;
 
 public class YunLogin extends HttpServlet {
-	
+
 	/**
 	 * Constructor of the object.
 	 */
@@ -38,13 +38,17 @@ public class YunLogin extends HttpServlet {
 
 	/**
 	 * The doGet method of the servlet. <br>
-	 *
+	 * 
 	 * This method is called when a form has its tag value method equals to get.
 	 * 
-	 * @param request the request send by the client to the server
-	 * @param response the response send by the server to the client
-	 * @throws ServletException if an error occurred
-	 * @throws IOException if an error occurred
+	 * @param request
+	 *            the request send by the client to the server
+	 * @param response
+	 *            the response send by the server to the client
+	 * @throws ServletException
+	 *             if an error occurred
+	 * @throws IOException
+	 *             if an error occurred
 	 */
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -66,13 +70,18 @@ public class YunLogin extends HttpServlet {
 
 	/**
 	 * The doPost method of the servlet. <br>
-	 *
-	 * This method is called when a form has its tag value method equals to post.
 	 * 
-	 * @param request the request send by the client to the server
-	 * @param response the response send by the server to the client
-	 * @throws ServletException if an error occurred
-	 * @throws IOException if an error occurred
+	 * This method is called when a form has its tag value method equals to
+	 * post.
+	 * 
+	 * @param request
+	 *            the request send by the client to the server
+	 * @param response
+	 *            the response send by the server to the client
+	 * @throws ServletException
+	 *             if an error occurred
+	 * @throws IOException
+	 *             if an error occurred
 	 */
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -80,8 +89,8 @@ public class YunLogin extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		String loginResuet = null;
-		String resMsg= null;
-		String resHeadUrl =null;
+		String resMsg = null;
+		String resHeadUrl = null;
 		String resNikeName = null;
 		Connection connection1 = null;
 		PreparedStatement statement = null;
@@ -90,57 +99,88 @@ public class YunLogin extends HttpServlet {
 		String psd = request.getParameter("password");
 		String usn = request.getParameter("username");
 		if (usn != null) {
-			String selectPssword = "select * from users WHERE mail="
-					+ "'" + usn + "'";
-			connection1 = YunDBHelper.getConnection();
-			try {
-				statement = connection1.prepareStatement(selectPssword);
-				mresult = statement.executeQuery();
+			String selectPssword = "select * from users WHERE mail=" + "'"
+					+ usn + "'";
+			connection1 = new YunDBHelper().getConnection();
+			if (connection1 == null) {
+				loginResuet = "20005";// 账号为空
+				resMsg = "服务器异常";
+				map.put("resCode", loginResuet);
+				map.put("resMsg", resMsg);
 
-				if (mresult.next()) {
-					String passwordA = mresult.getString("password");
-					if (passwordA.equals(psd)) {
-						loginResuet = "20001"; // 20001验证正确登录成功
-						resMsg = "登录成功";
-						resHeadUrl =mresult.getString("head_url");
-						resNikeName = mresult.getString("nikename");
-						map.put("resCode", loginResuet);  
-						map.put("resMsg", resMsg);
-						map.put("resHeadUrl", resHeadUrl);
-						map.put("resNikeName", resNikeName);
+			} else {
+				try {
+					statement = connection1.prepareStatement(selectPssword);
+					mresult = statement.executeQuery();
+
+					if (mresult.next()) {
+						String passwordA = mresult.getString("password");
+						if (passwordA.equals(psd)) {
+							loginResuet = "20001"; // 20001验证正确登录成功
+							resMsg = "登录成功";
+							resHeadUrl = mresult.getString("head_url");
+							resNikeName = mresult.getString("nikename");
+							map.put("resCode", loginResuet);
+							map.put("resMsg", resMsg);
+							map.put("resHeadUrl", resHeadUrl);
+							map.put("resNikeName", resNikeName);
+
+						} else {
+							loginResuet = "20002";// 20002密码错误
+							resMsg = "密码错误";
+							map.put("resCode", loginResuet);
+							map.put("resMsg", resMsg);
+
+						}
 
 					} else {
-						loginResuet = "20002";// 20002密码错误
-						resMsg = "密码错误";
-						map.put("resCode", loginResuet);  
+						loginResuet = "20003";// 20003无此账号
+						resMsg = "无此账号";
+						map.put("resCode", loginResuet);
 						map.put("resMsg", resMsg);
-						
+
+					}
+				} catch (SQLException e) {
+					loginResuet = "20005";// 账号为空
+					resMsg = "数据库异常";
+					map.put("resCode", loginResuet);
+					map.put("resMsg", resMsg);
+				}finally {
+					if (mresult != null) {
+						try {
+							mresult.close();
+							mresult = null;
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 
-				} else {
-					loginResuet = "20003";// 20003无此账号
-					resMsg = "无此账号";
-					map.put("resCode", loginResuet);  
-					map.put("resMsg", resMsg);
-					
+					if (statement != null) {
+						try {
+							statement.close();
+							statement = null;
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
-		}else{
-			loginResuet="20004";//账号为空
+		} else {
+			loginResuet = "20004";// 账号为空
 			resMsg = "账号为空";
-			map.put("resCode", loginResuet);  
+			map.put("resCode", loginResuet);
 			map.put("resMsg", resMsg);
-			
+
 		}
-		SimpleDateFormat sm=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		PrintWriter out = response.getWriter();
-		
+
 		JSONObject json = JSONObject.fromObject(map);
-		String sendMsg=json.toString();	
-		System.out.println("登录账号为："+usn+"||状态为："+loginResuet+"||时间："+sm.format(new Date()));
+		String sendMsg = json.toString();
+		System.out.println("登录账号为：" + usn + "||状态为：" + loginResuet + "||时间："
+				+ sm.format(new Date()));
 		out.println(sendMsg);
 
 		out.flush();
@@ -149,8 +189,9 @@ public class YunLogin extends HttpServlet {
 
 	/**
 	 * Initialization of the servlet. <br>
-	 *
-	 * @throws ServletException if an error occurs
+	 * 
+	 * @throws ServletException
+	 *             if an error occurs
 	 */
 	public void init() throws ServletException {
 		// Put your code here

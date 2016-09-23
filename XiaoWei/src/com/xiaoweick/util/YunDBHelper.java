@@ -21,18 +21,16 @@ public class YunDBHelper {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+System.out.println("数据库没连接上");}
 				
 			}
-	public static Connection getConnection(){
+	public  Connection getConnection(){
 		if (conn==null) {
 			try {
 				conn = DriverManager.getConnection(mysqlUrl, username, password);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				System.out.println("数据库没连接上");			}
 			return conn;
 		}
 		
@@ -40,7 +38,7 @@ public class YunDBHelper {
 	}
 public static void main(String[] args){
 	
-	Connection connection = YunDBHelper.getConnection();
+	Connection connection = new YunDBHelper().getConnection();
 	if(connection==null){
 		System.out.println("数据了链接异常");
 		
