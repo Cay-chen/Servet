@@ -76,11 +76,11 @@ public class CheckImages extends HttpServlet {
 			// 进行判断 是目录的放入directory集合中 文件的放入file集合中
 			if (files[i].isDirectory()) {
 				directory.add(filename[i]);
-				directoryTime.add(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+				directoryTime.add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 						.format(new Date(files[i].lastModified())));
 			} else {
 				file.add(filename[i]);
-				fileTime.add(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+				fileTime.add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 						.format(new Date(files[i].lastModified())));
 
 			}
