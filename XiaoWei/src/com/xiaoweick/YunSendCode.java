@@ -188,8 +188,8 @@ public class YunSendCode extends HttpServlet {
 		map.put("resCode", sendCode);
 		map.put("resMsg", sendMsg);
 		JSONObject json = JSONObject.fromObject(map);
-		String sendMsg = json.toString();
-		out.println(sendMsg);
+		String sendMsg1 = json.toString();
+		out.println(sendMsg1);
 		out.flush();
 		out.close();
 	}
