@@ -56,9 +56,9 @@ public class VersionUpdata extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		String user = request.getParameter("username");
 
-			String isUpdata = "1";//1强制更新  0非强制更新
-			String version = "1.0";//版本号
-			String downloadUrl = "下载地址";// 下载地址
+			String isUpdata = "0";//1强制更新  0非强制更新
+			String version = "1.1";//版本号
+			String downloadUrl = "https://beta.bugly.qq.com/api/download/pkg/2a77553c-84aa-4d73-bc89-3c7cb109e5a5?ext=apk";// 下载地址
 	
 		SimpleDateFormat sm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		PrintWriter out = response.getWriter();
